@@ -1,4 +1,5 @@
-#version 120
+precision mediump float;
+precision mediump int;
 
 uniform mat4 matrix;
 
