@@ -1,5 +1,4 @@
 .DS_Store
-Makefile
 CMakeCache.txt
 CMakeFiles
 cmake_install.cmake
@@ -13,4 +12,5 @@ log.txt
 *.exe
 *.dll
 *.pyc
-
+*.swp
+build/
