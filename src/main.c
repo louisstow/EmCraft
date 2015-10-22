@@ -2493,7 +2493,7 @@ void handle_movement(double dt) {
         s->y += vy + dy * ut;
         s->z += vz;
 
-2579        if (collide(2, &s->x, &s->y, &s->z)) {
+        if (collide(2, &s->x, &s->y, &s->z)) {
             dy = 0;
         }
     }
