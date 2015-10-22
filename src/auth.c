@@ -1,3 +1,5 @@
+#ifndef __EMSCRIPTEN__
+
 #include <curl/curl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,3 +49,5 @@ int get_access_token(
     }
     return 0;
 }
+
+#endif
