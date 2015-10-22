@@ -1,8 +1,15 @@
 #ifndef _util_h_
 #define _util_h_
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#ifdef __EMSCRIPTEN__
+	#include "GL/glew.h"
+	#include "GL/glext.h"
+	#include "GLFW/glfw3.h"
+#else
+	#include <GL/glew.h>
+	#include <GLFW/glfw3.h>
+#endif
+
 #include "config.h"
 
 #define PI 3.14159265359
