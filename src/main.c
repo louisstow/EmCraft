@@ -166,7 +166,7 @@ static Model model;
 static Model *g = &model;
 
 int chunked(float x) {
-    return floorf(roundf(x) / CHUNK_SIZE);
+    return floorf(round(x) / CHUNK_SIZE);
 }
 
 float time_of_day() {
@@ -600,8 +600,8 @@ int chunk_visible(float planes[6][4], int p, int q, int miny, int maxy) {
 
 int highest_block(float x, float z) {
     int result = -1;
-    int nx = roundf(x);
-    int nz = roundf(z);
+    int nx = round(x);
+    int nz = round(z);
     int p = chunked(x);
     int q = chunked(z);
     Chunk *chunk = find_chunk(p, q);
@@ -627,9 +627,9 @@ int _hit_test(
     int py = 0;
     int pz = 0;
     for (int i = 0; i < max_distance * m; i++) {
-        int nx = roundf(x);
-        int ny = roundf(y);
-        int nz = roundf(z);
+        int nx = round(x);
+        int ny = round(y);
+        int nz = round(z);
         if (nx != px || ny != py || nz != pz) {
             int hw = map_get(map, nx, ny, nz);
             if (hw > 0) {
@@ -701,7 +701,7 @@ int hit_test_face(Player *player, int *x, int *y, int *z, int *face) {
             *face = 3; return 1;
         }
         if (dx == 0 && dy == 1 && dz == 0) {
-            int degrees = roundf(DEGREES(atan2f(s->x - hx, s->z - hz)));
+            int degrees = round(DEGREES(atan2f(s->x - hx, s->z - hz)));
             if (degrees < 0) {
                 degrees += 360;
             }
@@ -721,31 +721,32 @@ int collide(int height, float *x, float *y, float *z) {
         return result;
     }
     Map *map = &chunk->map;
-    int nx = roundf(*x);
-    int ny = roundf(*y);
-    int nz = roundf(*z);
+    int nx = round(*x);
+    int ny = round(*y);
+    int nz = round(*z);
     float px = *x - nx;
     float py = *y - ny;
     float pz = *z - nz;
     float pad = 0.25;
-    for (int ddy = 1; ddy <= height; ddy++) {
-        if (px < -pad && is_obstacle(map_get(map, nx - 1, ny + (ddy - 1), nz))) {
+    for (int dy = 0; dy < height; dy++) {
+        if (px < -pad && is_obstacle(map_get(map, nx - 1, ny - dy, nz))) {
             *x = nx - pad;
         }
-        if (px > pad && is_obstacle(map_get(map, nx + 1, ny + (ddy - 1), nz))) {
+        if (px > pad && is_obstacle(map_get(map, nx + 1, ny - dy, nz))) {
             *x = nx + pad;
         }
-        if (py < -pad && is_obstacle(map_get(map, nx, ny - ddy - 1, nz))) {
+        if (py < -pad && is_obstacle(map_get(map, nx, (ny - dy) - 1, nz))) {
+            *y = ny - pad;
             result = 1;
         }
-        if (py > pad && is_obstacle(map_get(map, nx, ny - (ddy - 1), nz))) {
-            *y = ny + 1;
+        if (py > pad && is_obstacle(map_get(map, nx, ny - dy + 1, nz))) {
+            *y = ny + pad;
             result = 1;
         }
-        if (pz < -pad && is_obstacle(map_get(map, nx, ny + (ddy - 1), nz - 1))) {
+        if (pz < -pad && is_obstacle(map_get(map, nx, ny - dy, nz - 1))) {
             *z = nz - pad;
         }
-        if (pz > pad && is_obstacle(map_get(map, nx, ny + (ddy - 1), nz + 1))) {
+        if (pz > pad && is_obstacle(map_get(map, nx, ny - dy, nz + 1))) {
             *z = nz + pad;
         }
     }
@@ -757,9 +758,9 @@ int player_intersects_block(
     float x, float y, float z,
     int hx, int hy, int hz)
 {
-    int nx = roundf(x);
-    int ny = roundf(y);
-    int nz = roundf(z);
+    int nx = round(x);
+    int ny = round(y);
+    int nz = round(z);
     for (int i = 0; i < height; i++) {
         if (nx == hx && ny - i == hy && nz == hz) {
             return 1;
@@ -1362,14 +1363,18 @@ void ensure_chunks_worker(Player *player, Worker *worker) {
         for (int dq = -r; dq <= r; dq++) {
             int a = p + dp;
             int b = q + dq;
+            #ifndef __EMSCRIPTEN__
             int index = (ABS(a) ^ ABS(b)) % WORKERS;
             if (index != worker->index) {
                 continue;
             }
+            #endif
             Chunk *chunk = find_chunk(a, b);
+            #ifndef __EMSCRIPTEN__
             if (chunk && !chunk->dirty) {
                 continue;
             }
+            #endif
             int distance = MAX(ABS(dp), ABS(dq));
             int invisible = !chunk_visible(planes, a, b, 0, 256);
             int priority = 0;
@@ -2470,7 +2475,7 @@ void handle_movement(double dt) {
         }
     }
     float speed = g->flying ? 20 : 5;
-    int estimate = roundf(sqrtf(
+    int estimate = round(sqrtf(
         powf(vx * speed, 2) +
         powf(vy * speed + ABS(dy) * 2, 2) +
         powf(vz * speed, 2)) * dt * 8);
