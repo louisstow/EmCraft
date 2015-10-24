@@ -30,6 +30,14 @@
           return canvas;
         })()
 	};
+
+	document.addEventListener("keydown", function (e) {
+		if (e.keyCode === 32) {
+			e.preventDefault();
+			e.stopPropagation();
+			return false;
+		}
+	}, true);
 	</script>
 	{{{ SCRIPT }}}
 </body>
