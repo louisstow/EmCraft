@@ -9,9 +9,10 @@
 </head>
 <body>
 	<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+	<script src='memoryprofiler.js'></script>
 	<script>
 	var Module = {
-		preRun: [],
+		preRun: [memoryprofiler_add_hooks],
 		postRun: [],
 		canvas: (function() {
           var canvas = document.getElementById('canvas');
