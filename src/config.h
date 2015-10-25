@@ -9,7 +9,7 @@
 #define VSYNC 1
 #define SCROLL_THRESHOLD 0.1
 #define MAX_MESSAGES 4
-#define DB_PATH "craft.db"
+#define DB_PATH "/IDBFS/craft.db"
 #define USE_CACHE 1
 #define DAY_LENGTH 600
 #define INVERT_MOUSE 0
@@ -49,6 +49,6 @@
 #define RENDER_SIGN_RADIUS 4
 #define DELETE_CHUNK_RADIUS 14
 #define CHUNK_SIZE 32
-#define COMMIT_INTERVAL 50
+#define COMMIT_INTERVAL 10
 
 #endif

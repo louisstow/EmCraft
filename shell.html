@@ -9,10 +9,22 @@
 </head>
 <body>
 	<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
-	<script src='memoryprofiler.js'></script>
+	
 	<script>
+	function mountFS () {
+		console.log("MOUNT FS");
+		FS.mkdir('/IDBFS');
+		FS.mount(IDBFS, {}, '/IDBFS');
+		FS.syncfs(true, function (err) {
+			if (err) {
+				console.error("SYNC ERROR", err);
+				return;
+			}
+		});
+	}
+
 	var Module = {
-		preRun: [memoryprofiler_add_hooks],
+		preRun: [mountFS],
 		postRun: [],
 		canvas: (function() {
           var canvas = document.getElementById('canvas');

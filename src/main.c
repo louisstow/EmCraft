@@ -166,7 +166,7 @@ static Model model;
 static Model *g = &model;
 
 int chunked(float x) {
-    return floorf(round(x) / CHUNK_SIZE);
+    return floorf(roundf(x) / CHUNK_SIZE);
 }
 
 float time_of_day() {
@@ -600,8 +600,8 @@ int chunk_visible(float planes[6][4], int p, int q, int miny, int maxy) {
 
 int highest_block(float x, float z) {
     int result = -1;
-    int nx = round(x);
-    int nz = round(z);
+    int nx = roundf(x);
+    int nz = roundf(z);
     int p = chunked(x);
     int q = chunked(z);
     Chunk *chunk = find_chunk(p, q);
@@ -627,9 +627,9 @@ int _hit_test(
     int py = 0;
     int pz = 0;
     for (int i = 0; i < max_distance * m; i++) {
-        int nx = round(x);
-        int ny = round(y);
-        int nz = round(z);
+        int nx = roundf(x);
+        int ny = roundf(y);
+        int nz = roundf(z);
         if (nx != px || ny != py || nz != pz) {
             int hw = map_get(map, nx, ny, nz);
             if (hw > 0) {
@@ -701,7 +701,7 @@ int hit_test_face(Player *player, int *x, int *y, int *z, int *face) {
             *face = 3; return 1;
         }
         if (dx == 0 && dy == 1 && dz == 0) {
-            int degrees = round(DEGREES(atan2f(s->x - hx, s->z - hz)));
+            int degrees = roundf(DEGREES(atan2f(s->x - hx, s->z - hz)));
             if (degrees < 0) {
                 degrees += 360;
             }
@@ -721,9 +721,9 @@ int collide(int height, float *x, float *y, float *z) {
         return result;
     }
     Map *map = &chunk->map;
-    int nx = round(*x);
-    int ny = round(*y);
-    int nz = round(*z);
+    int nx = roundf(*x);
+    int ny = roundf(*y);
+    int nz = roundf(*z);
     float px = *x - nx;
     float py = *y - ny;
     float pz = *z - nz;
@@ -758,9 +758,9 @@ int player_intersects_block(
     float x, float y, float z,
     int hx, int hy, int hz)
 {
-    int nx = round(x);
-    int ny = round(y);
-    int nz = round(z);
+    int nx = roundf(x);
+    int ny = roundf(y);
+    int nz = roundf(z);
     for (int i = 0; i < height; i++) {
         if (nx == hx && ny - i == hy && nz == hz) {
             return 1;
@@ -2475,7 +2475,7 @@ void handle_movement(double dt) {
         }
     }
     float speed = g->flying ? 20 : 5;
-    int estimate = round(sqrtf(
+    int estimate = roundf(sqrtf(
         powf(vx * speed, 2) +
         powf(vy * speed + ABS(dy) * 2, 2) +
         powf(vz * speed, 2)) * dt * 8);
@@ -2674,6 +2674,14 @@ void one_tick(void) {
     if (now - last_commit > COMMIT_INTERVAL) {
         last_commit = now;
         db_commit();
+
+        #ifdef __EMSCRIPTEN__
+        EM_ASM(
+            FS.syncfs(function (err) {
+                assert(!err);
+            });
+        );
+        #endif
     }
 
     // SEND POSITION TO SERVER //
@@ -2977,6 +2985,16 @@ int main(int argc, char **argv) {
     while (running) {
         // DATABASE INITIALIZATION //
         if (g->mode == MODE_OFFLINE || USE_CACHE) {
+            #ifdef __EMSCRIPTEN__
+            // EM_ASM(
+            //     FS.mkdir('/IDBFS');
+            //     FS.mount(IDBFS, {}, '/IDBFS');
+            //     FS.syncfs(true, function (err) {
+            //         assert(!err);
+            //     });
+            // );
+            #endif
+
             db_enable();
             if (db_init(g->db_path)) {
                 fprintf(stderr, "DB INIT FAIL\n");
