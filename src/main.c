@@ -1324,7 +1324,7 @@ void force_chunks(Player *player) {
     State *s = &player->state;
     int p = chunked(s->x);
     int q = chunked(s->z);
-    int r = 1;
+    int r = 3;
     for (int dp = -r; dp <= r; dp++) {
         for (int dq = -r; dq <= r; dq++) {
             int a = p + dp;
